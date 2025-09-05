@@ -1,24 +1,27 @@
 # main.py
 from brain.llm_clients.openai_client import get_llm_response
+from body.dispatcher import dispatch_command  # Import the dispatcher
 
 def main():
     print("🤖 Your Personal AI is now active. Type 'quit' to exit.")
     
     while True:
-        # Get input from the user
         user_input = input("You: ")
         
-        # Check if the user wants to quit
         if user_input.lower() in ['quit', 'exit', 'bye']:
             print("AI: Goodbye.")
             break
         
-        # Get the AI's response by calling our function
-        ai_response = get_llm_response(user_input)
+        # FIRST, try to dispatch the command to a tool
+        tool_response = dispatch_command(user_input)
         
-        # Print the AI's response
-        print(f"AI: {ai_response}")
+        if tool_response is not None:
+            # If dispatcher handled it (returned a response), use that
+            print(f"AI: {tool_response}")
+        else:
+            # If dispatcher returned None, send it to the LLM Brain
+            ai_response = get_llm_response(user_input)
+            print(f"AI: {ai_response}")
 
-# This line ensures the code runs only when executed directly
 if __name__ == "__main__":
     main()

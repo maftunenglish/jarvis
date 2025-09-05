@@ -1,7 +1,9 @@
 # body/dispatcher.py
 from body.tools.system_control import get_time, get_date
-from body.tools.google_keep import create_note
-from body.tools.memory_management import remember_fact, recall_fact  # New imports
+from body.tools.memory_management import remember_fact, recall_fact
+
+# Google Keep is optional since we're skipping it for now
+google_keep_available = False
 
 def dispatch_command(user_input):
     user_input_lower = user_input.lower()
@@ -9,16 +11,21 @@ def dispatch_command(user_input):
     # Existing tools
     if "time" in user_input_lower:
         return get_time()
+        
     if "date" in user_input_lower:
         return get_date()
-    if any(word in user_input_lower for word in ['note', 'remember', 'remind me','keep in mind', ]):
-        # ... existing note code ...
+        
+    # Google Keep commands (optional)
+    if google_keep_available and any(word in user_input_lower for word in ['note', 'remember', 'remind me']):
+        # Note: Google Keep implementation would go here
+        pass
     
-    # NEW: Long-term memory commands
+    # Memory commands
     if any(word in user_input_lower for word in ['remember that', 'my', 'is', 'i like', 'i love']):
         return remember_fact(user_input)
     
-    if any(word in user_input_lower for word in ['what is my', 'what was my' ,'what i was said']):
+    if any(word in user_input_lower for word in ['what is my', 'what was my']):
         return recall_fact(user_input)
     
+    # If no tool matches, return None to send to LLM
     return None

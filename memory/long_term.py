@@ -2,168 +2,143 @@
 import sqlite3
 import json
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
+import os
+from enum import Enum
 
+class MemoryCategory(Enum):
+    PERSONAL = "personal"
+    WORK = "work"
+    PREFERENCE = "preference"
+    MEDICAL = "medical"
+    CONTACT = "contact"
+    FINANCIAL = "financial"
+    OTHER = "other"
 
 class LongTermMemory:
-    def __init__(self, db_path: str = "memory/jarvis_memory.db"):
+    def __init__(self, db_path: str = 'memory/jarvis_memory.db'):
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
         self.db_path = db_path
         self._init_database()
-
+    
     def _init_database(self):
-        """Initialize the database with required tables."""
+        """Initialize the database with enhanced tables."""
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-
-        # Table for storing facts with version history
-        c.execute(
-            """
+        
+        # Enhanced facts table with categories and confidence
+        c.execute('''
             CREATE TABLE IF NOT EXISTS facts (
                 id INTEGER PRIMARY KEY,
                 subject TEXT NOT NULL,
                 attribute TEXT NOT NULL,
                 value TEXT NOT NULL,
+                category TEXT NOT NULL DEFAULT 'personal',
+                confidence REAL DEFAULT 0.8,
+                source TEXT DEFAULT 'user_input',
                 valid_from DATETIME NOT NULL,
                 valid_until DATETIME,
-                confidence REAL DEFAULT 1.0,
-                source TEXT DEFAULT 'user_input',
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        """
-        )
-
-        # Table for general notes and journal entries
-        c.execute(
-            """
-            CREATE TABLE IF NOT EXISTS notes (
-                id INTEGER PRIMARY KEY,
-                title TEXT,
-                content TEXT NOT NULL,
-                category TEXT,
-                tags TEXT,
+                metadata TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
-
-        # Index for efficient querying
-        c.execute("CREATE INDEX IF NOT EXISTS idx_facts_subject ON facts(subject)")
-        c.execute("CREATE INDEX IF NOT EXISTS idx_facts_attribute ON facts(attribute)")
-        c.execute(
-            "CREATE INDEX IF NOT EXISTS idx_facts_time ON facts(valid_from, valid_until)"
-        )
-
-        conn.commit()
-        conn.close()
-
-    def add_fact(
-        self, subject: str, attribute: str, value: Any, valid_from: datetime = None
-    ):
-        """
-        Add a new fact or update an existing one with versioning.
-        """
-        conn = sqlite3.connect(self.db_path)
-        c = conn.cursor()
-
-        valid_from = valid_from or datetime.now()
-
-        # First, invalidate any current fact for this subject+attribute
-        c.execute(
-            """
-            UPDATE facts SET valid_until = ?
-            WHERE subject = ? AND attribute = ? AND valid_until IS NULL
-        """,
-            (valid_from, subject, attribute),
-        )
-
-        # Insert the new fact as current
-        c.execute(
-            """
-            INSERT INTO facts (subject, attribute, value, valid_from, valid_until)
-            VALUES (?, ?, ?, ?, NULL)
-        """,
-            (subject, attribute, str(value), valid_from),
-        )
-
-        conn.commit()
-        conn.close()
-
-    def get_current_fact(self, subject: str, attribute: str) -> Optional[Dict]:
-        """Get the current value of a fact."""
-        conn = sqlite3.connect(self.db_path)
-        c = conn.cursor()
-
-        c.execute(
-            """
-            SELECT value, valid_from 
-            FROM facts 
-            WHERE subject = ? AND attribute = ? AND valid_until IS NULL
-            ORDER BY valid_from DESC LIMIT 1
-        """,
-            (subject, attribute),
-        )
-
-        result = c.fetchone()
-        conn.close()
-
-        if result:
-            return {"value": result[0], "valid_from": result[1]}
-        return None
-
-    def get_fact_history(self, subject: str, attribute: str) -> List[Dict]:
-        """Get complete history of a fact with timestamps."""
-        conn = sqlite3.connect(self.db_path)
-        c = conn.cursor()
-
-        c.execute(
-            """
-            SELECT value, valid_from, valid_until 
-            FROM facts 
-            WHERE subject = ? AND attribute = ?
-            ORDER BY valid_from DESC
-        """,
-            (subject, attribute),
-        )
-
-        history = []
-        for row in c.fetchall():
-            history.append(
-                {"value": row[0], "valid_from": row[1], "valid_until": row[2]}
+        ''')
+        
+        # Memory access statistics
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS memory_access (
+                id INTEGER PRIMARY KEY,
+                fact_id INTEGER,
+                access_type TEXT,
+                accessed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (fact_id) REFERENCES facts (id)
             )
-
+        ''')
+        
+        # Create indexes
+        c.execute('CREATE INDEX IF NOT EXISTS idx_facts_category ON facts(category)')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_facts_confidence ON facts(confidence)')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_facts_subject_attr ON facts(subject, attribute)')
+        
+        conn.commit()
         conn.close()
-        return history
-
-    def get_fact_at_time(
-        self, subject: str, attribute: str, target_time: datetime
-    ) -> Optional[Dict]:
-        """Get what a fact was at a specific point in time."""
+    
+    def add_fact(self, subject: str, attribute: str, value: Any, 
+                 category: str = "personal", confidence: float = 0.9, 
+                 source: str = "user_input", metadata: dict = None):
+        """
+        Enhanced fact storage with categories and confidence scoring.
+        """
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-
-        c.execute(
-            """
-            SELECT value, valid_from, valid_until 
-            FROM facts 
-            WHERE subject = ? AND attribute = ? 
-            AND valid_from <= ? AND (valid_until >= ? OR valid_until IS NULL)
-            ORDER BY valid_from DESC LIMIT 1
-        """,
-            (subject, attribute, target_time, target_time),
-        )
-
-        result = c.fetchone()
+        
+        valid_from = datetime.now()
+        metadata_str = json.dumps(metadata) if metadata else None
+        
+        # Invalidate previous fact if it exists
+        c.execute('''
+            UPDATE facts SET valid_until = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE subject = ? AND attribute = ? AND valid_until IS NULL
+        ''', (valid_from, subject, attribute))
+        
+        # Insert new fact
+        c.execute('''
+            INSERT INTO facts (subject, attribute, value, category, 
+                             confidence, source, valid_from, valid_until, metadata)
+            VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?)
+        ''', (subject, attribute, str(value), category, confidence, 
+              source, valid_from, metadata_str))
+        
+        conn.commit()
         conn.close()
-
-        if result:
-            return {
-                "value": result[0],
-                "valid_from": result[1],
-                "valid_until": result[2],
+        return True
+    
+    def get_memory_summary(self, subject: str = "user") -> Dict:
+        """Get summary of what we know about a subject."""
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        
+        c.execute('''
+            SELECT category, COUNT(*) as count, 
+                   AVG(confidence) as avg_confidence
+            FROM facts 
+            WHERE subject = ? AND valid_until IS NULL
+            GROUP BY category
+        ''', (subject,))
+        
+        summary = {}
+        for row in c.fetchall():
+            summary[row[0]] = {
+                'count': row[1],
+                'avg_confidence': round(row[2], 2)
             }
-        return None
-
+        
+        conn.close()
+        return summary
+    
+    def get_related_facts(self, subject: str, attribute: str) -> List[Dict]:
+        """Get facts related to a specific attribute."""
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        
+        c.execute('''
+            SELECT attribute, value, confidence, category
+            FROM facts 
+            WHERE subject = ? AND valid_until IS NULL
+            ORDER BY confidence DESC, updated_at DESC
+        ''', (subject,))
+        
+        related = []
+        for row in c.fetchall():
+            related.append({
+                'attribute': row[0],
+                'value': row[1],
+                'confidence': row[2],
+                'category': row[3]
+            })
+        
+        conn.close()
+        return related
 
 # Global memory instance
 long_term_memory = LongTermMemory()

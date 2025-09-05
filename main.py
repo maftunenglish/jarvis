@@ -1,31 +1,30 @@
 # main.py
 from brain.llm_clients.openai_client import get_llm_response
 from body.dispatcher import dispatch_command
-from memory.short_term import add_to_history, get_recent_history
 from interfaces.input_manager import get_user_input, select_interface_mode
 from interfaces.voice_output import speak
+from memory.short_term import add_to_history
+from brain.memory_orchestrator import memory_orchestrator  # NEW
+from memory.long_term import long_term_memory  # NEW
 
 def main():
-    # Select interface mode
     mode = select_interface_mode()
     
-    # Initial greeting based on mode
+    # NEW: Display memory summary on startup
+    memory_summary = long_term_memory.get_memory_summary()
+    print(f"Memory Summary: {memory_summary}")
+    
     if mode == 'voice':
         speak("All systems operational. How may I assist you, Sir?")
     else:
         print("AI: Systems ready. How may I assist you, Sir?")
     
     while True:
-        # Get input based on selected mode
         user_input = get_user_input(mode)
-        
         if not user_input:
-            if mode == 'voice':
-                continue  # Keep listening in voice mode
-            else:
-                break     # Exit on empty text input
+            if mode == 'voice': continue
+            else: break
         
-        # Check for exit commands or mode switch
         if user_input.lower() in ['quit', 'exit', 'shutdown']:
             if mode == 'voice':
                 speak("Shutting down systems. Goodbye, Sir.")
@@ -42,21 +41,30 @@ def main():
                 print(f"AI: Understood, Sir. {status}.")
             continue
         
-        # Process the command
+        # NEW: Get memory context for better responses
+        memory_context = memory_orchestrator.get_memory_context(user_input)
+        
+        # Process command (existing functionality preserved)
         tool_response = dispatch_command(user_input)
         
         if tool_response is not None:
             response = tool_response
         else:
-            response = get_llm_response(user_input)
+            # NEW: Pass memory context to LLM
+            enhanced_input = f"Memory context: {memory_context}\n\nUser: {user_input}"
+            response = get_llm_response(enhanced_input)
         
-        # Output based on mode
+        # NEW: Intelligent memory extraction
+        memory_result = memory_orchestrator.extract_and_store_memory(user_input, response)
+        if memory_result['stored_count'] > 0:
+            print(f"📝 Auto-remembered {memory_result['stored_count']} facts")
+        
+        # Output response
         if mode == 'voice':
             speak(response)
         else:
             print(f"AI: {response}")
             
-        # Add to conversation history
         add_to_history(user_input, response)
 
 if __name__ == "__main__":

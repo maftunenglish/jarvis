@@ -9,7 +9,8 @@ class Settings:
     
     # OpenAI API Configuration
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-    
+    DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
+    ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
     # NewsAPI Configuration (for future use)
     NEWS_API_KEY = os.getenv('NEWS_API_KEY')
     

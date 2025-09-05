@@ -20,33 +20,26 @@ def load_jarvis_persona():
 
 JARVIS_PROMPT = load_jarvis_persona()
 
-def get_llm_response(user_input: str) -> str:
+def get_llm_response(user_input: str, context: list = None) -> str:
     """
-    Advanced context management with token optimization.
+    Enhanced to use conversation context.
     """
     try:
-        history = get_recent_history()
+        # Prepare message history with context
         messages = [{"role": "system", "content": JARVIS_PROMPT}]
         
-        # Smart context selection: prioritize recent exchanges but keep under reasonable limit
-        total_chars = 0
-        max_context_chars = 2000  # Limit context to ~1000 characters
+        # Add conversation context if provided
+        if context:
+            for exchange in context[-3:]:  # Last 3 exchanges only
+                messages.append({"role": "user", "content": exchange['user']})
+                messages.append({"role": "assistant", "content": exchange['ai']})
         
-        # Add history from newest to oldest until we hit the limit
-        for exchange in reversed(history):
-            exchange_chars = len(exchange['user']) + len(exchange['ai'])
-            if total_chars + exchange_chars > max_context_chars:
-                break
-            messages.insert(1, {"role": "assistant", "content": exchange['ai']})
-            messages.insert(1, {"role": "user", "content": exchange['user']})
-            total_chars += exchange_chars
-        
+        # Add the current user input
         messages.append({"role": "user", "content": user_input})
         
         response = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=messages,
-            max_tokens=1000
+            messages=messages
         )
         return response.choices[0].message.content.strip()
         

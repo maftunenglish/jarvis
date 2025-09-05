@@ -1,18 +1,14 @@
 # main.py
-from brain.llm_clients.openai_client import get_llm_response
+# from brain.llm_clients.openai_client import get_llm_response
+from brain.orchestrator import route_task
 from body.dispatcher import dispatch_command
 from interfaces.input_manager import get_user_input, select_interface_mode
 from interfaces.voice_output import speak
-from memory.short_term import add_to_history
-from brain.memory_orchestrator import memory_orchestrator  # NEW
-from memory.long_term import long_term_memory  # NEW
+from memory.short_term import add_to_history, get_recent_history  # RESTORED
+from memory.long_term import long_term_memory  # RESTORED
 
 def main():
     mode = select_interface_mode()
-    
-    # NEW: Display memory summary on startup
-    memory_summary = long_term_memory.get_memory_summary()
-    print(f"Memory Summary: {memory_summary}")
     
     if mode == 'voice':
         speak("All systems operational. How may I assist you, Sir?")
@@ -41,23 +37,16 @@ def main():
                 print(f"AI: Understood, Sir. {status}.")
             continue
         
-        # NEW: Get memory context for better responses
-        memory_context = memory_orchestrator.get_memory_context(user_input)
-        
-        # Process command (existing functionality preserved)
+        # Process command
         tool_response = dispatch_command(user_input)
         
         if tool_response is not None:
             response = tool_response
         else:
-            # NEW: Pass memory context to LLM
-            enhanced_input = f"Memory context: {memory_context}\n\nUser: {user_input}"
-            response = get_llm_response(enhanced_input)
-        
-        # NEW: Intelligent memory extraction
-        memory_result = memory_orchestrator.extract_and_store_memory(user_input, response)
-        if memory_result['stored_count'] > 0:
-            print(f"📝 Auto-remembered {memory_result['stored_count']} facts")
+            # Get recent history for context
+            recent_history = get_recent_history()
+            # Pass history to LLM for contextual responses
+            response = route_task(user_input, context=recent_history)
         
         # Output response
         if mode == 'voice':
@@ -65,6 +54,7 @@ def main():
         else:
             print(f"AI: {response}")
             
+        # Add to conversation history
         add_to_history(user_input, response)
 
 if __name__ == "__main__":

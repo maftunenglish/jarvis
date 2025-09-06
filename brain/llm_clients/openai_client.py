@@ -1,6 +1,10 @@
+# brain/llm_clients/openai_client.py
 """
 Robust OpenAI client with API-key rotation, retry on rate-limits/errors, and token usage tracking.
+Now with J.A.R.V.I.S. personality integration.
 """
+
+import os
 import time
 import math
 from typing import List, Dict, Any, Optional
@@ -9,6 +13,9 @@ from dotenv import load_dotenv
 # Import utility classes
 from brain.llm_utils.token_tracker import TokenTracker
 from brain.llm_utils.key_manager import KeyManager
+
+# Import personality config
+from brain.utils.config_loader import config_loader
 
 try:
     from openai import (
@@ -38,6 +45,10 @@ class OpenAIClient:
         # Initialize managers
         self.key_manager = KeyManager(default_cooldown)
         self.token_tracker = TokenTracker(daily_token_limit)
+        
+        # Initialize personality configuration
+        self.personality = config_loader
+        self.user_address = self.personality.get_user_address()
 
         # Load keys
         raw_keys = self.key_manager.load_keys_from_env()
@@ -49,6 +60,61 @@ class OpenAIClient:
         ]
 
         print(f"[openai_client] Token usage: {self.token_tracker.data['tokens_used_today']}/{daily_token_limit} today")
+        print(f"[openai_client] Personality: {self.personality.get_personality_traits()['name']}")
+        print(f"[openai_client] Addressing user as: {self.user_address}")
+
+    def _apply_personality_system_prompt(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Apply J.A.R.V.I.S. personality system prompt to messages if not already present."""
+        # Check if system prompt already exists
+        has_system_prompt = any(msg.get('role') == 'system' for msg in messages)
+        
+        if not has_system_prompt:
+            # Insert J.A.R.V.I.S. system prompt at the beginning
+            system_message = {"role": "system", "content": self.personality.get_system_prompt()}
+            return [system_message] + messages
+        
+        return messages
+
+    def _apply_personality_post_processing(self, response: str) -> str:
+        """Apply J.A.R.V.I.S. personality post-processing to responses."""
+        # Remove emojis if disabled in personality
+        if not self.personality.should_use_emojis():
+            response = self._remove_emojis(response)
+        
+        # Ensure professional tone
+        response = self._ensure_professional_tone(response)
+        
+        return response
+
+    def _remove_emojis(self, text: str) -> str:
+        """Remove emojis from text (J.A.R.V.I.S. doesn't use emojis)."""
+        import re
+        emoji_pattern = re.compile(
+            "["
+            u"\U0001F600-\U0001F64F"  # emoticons
+            u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+            u"\U0001F680-\U0001F6FF"  # transport & map symbols
+            u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+            "]+", flags=re.UNICODE
+        )
+        return emoji_pattern.sub(r'', text)
+
+    def _ensure_professional_tone(self, text: str) -> str:
+        """Ensure response maintains J.A.R.V.I.S. professional tone."""
+        import re
+        # Remove excessive informality
+        informal_patterns = [
+            r'\b(lol|rofl|lmao|haha|hehe)\b',
+            r'\b(omg|wtf|smh)\b',
+            r'!!!+',
+            r'\?\!+',
+            r'\.\.\.+'
+        ]
+        
+        for pattern in informal_patterns:
+            text = re.sub(pattern, '', text, flags=re.IGNORECASE)
+        
+        return text
 
     def _truncate_messages_if_needed(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Truncate messages if they exceed the maximum tokens per request."""
@@ -105,6 +171,9 @@ class OpenAIClient:
         can_proceed, reason = self.token_tracker.check_limits()
         if not can_proceed:
             raise RuntimeError(f"Token limit exceeded: {reason}")
+
+        # Apply J.A.R.V.I.S. personality system prompt
+        messages = self._apply_personality_system_prompt(messages)
 
         # Truncate messages if needed
         messages = self._truncate_messages_if_needed(messages)
@@ -188,16 +257,19 @@ class OpenAIClient:
             time.sleep(0.5)
 
     def say(self, text: str, **kwargs) -> str:
-        """Convenience method for single messages."""
+        """Convenience method for single messages with personality processing."""
         messages = [{"role": "user", "content": text}]
         resp = self.chat_completion(messages=messages, **kwargs)
         try:
-            return resp.choices[0].message.content
+            response_text = resp.choices[0].message.content
+            # Apply J.A.R.V.I.S. personality post-processing
+            return self._apply_personality_post_processing(response_text)
         except Exception:
-            return str(resp)
+            # Use personality-specific error response
+            return self.personality.get_error_response()
 
 def get_llm_response(user_input: str, context: list = None) -> str:
-    """Compatibility function for existing code."""
+    """Compatibility function for existing code with personality integration."""
     client = OpenAIClient()
 
     messages = []
@@ -210,6 +282,9 @@ def get_llm_response(user_input: str, context: list = None) -> str:
 
     try:
         response = client.chat_completion(messages=messages)
-        return response.choices[0].message.content
+        response_text = response.choices[0].message.content
+        # Apply personality post-processing
+        return client._apply_personality_post_processing(response_text)
     except Exception as e:
-        return f"Error: {str(e)}"
+        # Use personality-specific error response
+        return client.personality.get_error_response() + f" Technical details: {str(e)}"

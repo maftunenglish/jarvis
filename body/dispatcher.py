@@ -1,6 +1,8 @@
 # body/dispatcher.py
-from body.tools.system_control import get_time, get_date
-from body.tools.memory_management import remember_fact, recall_fact
+# from body.tools.system_control import get_time, get_date
+# from body.tools.memory_management import remember_fact, recall_fact
+from .tools.system_control import get_time, get_date  # Changed to relative import
+from .tools.memory_management import remember_fact, recall_fact  # Relative import
 from memory.short_term import get_recent_history
 from memory.long_term import long_term_memory
 from brain.api_manager import api_manager  # NEW IMPORT
@@ -32,11 +34,11 @@ def dispatch_command(user_input):
                 else:
                     return "API key already exists, Sir."
             else:
-                # Default priority if not specified
+                # Use specified priority
                 service = 'openai'
                 api_key = parts[3]
-                priority = 99  # Low priority for manually added keys
-                success = api_manager.add_api_key(service, api_key, priority)
+                priority = int(parts[5])  # ← USE THE PROVIDED PRIORITY
+                api_manager.add_api_key(service, api_key, priority)
                 if success:
                     return f"Added {service} API key with default priority, Sir."
                 else:

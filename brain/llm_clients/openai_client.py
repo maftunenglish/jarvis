@@ -3,7 +3,7 @@ from openai import OpenAI
 from config.settings import settings
 import yaml
 import os
-from brain.api_manager import api_manager  # ← UNCOMMENT THIS LINE
+from brain.api_manager import api_manager
 from memory.short_term import get_recent_history
 
 def load_jarvis_persona():
@@ -21,20 +21,21 @@ JARVIS_PROMPT = load_jarvis_persona()
 
 def get_llm_response(user_input: str, context: list = None) -> str:
     """
-    Enhanced to use conversation context with API failover.
+    Sends a user's message to the GPT model with conversation context.
+    Uses API manager for key rotation and failover.
     """
     max_retries = 3
     retry_count = 0
     
     while retry_count < max_retries:
         try:
-            # Get next available API key from manager ← NEW CODE
+            # Get next available API key from manager
             api_key = api_manager.get_next_available_key('openai')
             
             if not api_key:
                 return "All API keys are currently rate-limited. Please try again later, Sir."
             
-            # Create client with the obtained key ← NEW CODE
+            # Create client with the obtained key
             client = OpenAI(api_key=api_key)
             
             # Prepare message history with context
@@ -58,9 +59,9 @@ def get_llm_response(user_input: str, context: list = None) -> str:
         except Exception as e:
             error_msg = str(e)
             
-            # Check if rate limit error ← NEW CODE
+            # Check if rate limit error
             if "rate limit" in error_msg.lower() or "429" in error_msg:
-                print(f"Rate limit hit on key. Marking as limited.")
+                print(f"Rate limit hit. Marking key as limited.")
                 api_manager.mark_key_rate_limited(api_key)
                 retry_count += 1
                 continue

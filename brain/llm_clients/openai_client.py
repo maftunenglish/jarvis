@@ -34,8 +34,8 @@ class OpenAIClient:
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
-        default_cooldown: int = 60,        # seconds to cooldown a rate-limited key
-        max_retries_per_key: int = 1,      # retry attempts per key before rotating
+        default_cooldown: int = 60,  # seconds to cooldown a rate-limited key
+        max_retries_per_key: int = 1,  # retry attempts per key before rotating
     ):
         load_dotenv()  # loads .env in repo root if present
         self.model = model
@@ -48,7 +48,8 @@ class OpenAIClient:
 
         # state for each key: {'key': ..., 'cooldown_until': 0.0, 'bad': False}
         self.keys_state = [
-            {"key": k.strip(), "cooldown_until": 0.0, "bad": False} for k in self._raw_keys
+            {"key": k.strip(), "cooldown_until": 0.0, "bad": False}
+            for k in self._raw_keys
         ]
         self.current_index = 0
 
@@ -101,8 +102,12 @@ class OpenAIClient:
         return None
 
     def _mark_rate_limited(self, idx: int, cooldown: Optional[int] = None):
-        self.keys_state[idx]["cooldown_until"] = time.time() + (cooldown or self.default_cooldown)
-        print(f"[openai_client] Key at index {idx} put on cooldown until {self.keys_state[idx]['cooldown_until']}")
+        self.keys_state[idx]["cooldown_until"] = time.time() + (
+            cooldown or self.default_cooldown
+        )
+        print(
+            f"[openai_client] Key at index {idx} put on cooldown until {self.keys_state[idx]['cooldown_until']}"
+        )
 
     def _mark_bad(self, idx: int):
         self.keys_state[idx]["bad"] = True
@@ -116,7 +121,10 @@ class OpenAIClient:
         n = len(self.keys_state)
         for i in range(1, n + 1):
             cand = (self.current_index + i) % n
-            if not self.keys_state[cand]["bad"] and time.time() >= self.keys_state[cand]["cooldown_until"]:
+            if (
+                not self.keys_state[cand]["bad"]
+                and time.time() >= self.keys_state[cand]["cooldown_until"]
+            ):
                 self.current_index = cand
                 return True
         return False
@@ -124,13 +132,17 @@ class OpenAIClient:
     def _select_and_apply_key(self) -> (int, OpenAI):
         idx = self._get_available_key_index()
         if idx is None:
-            raise RuntimeError("All API keys are either on cooldown or invalid/blocked.")
+            raise RuntimeError(
+                "All API keys are either on cooldown or invalid/blocked."
+            )
         self._rotate_to_index(idx)
         key = self.keys_state[idx]["key"]
         print(f"[openai_client] Using key index {idx}.")
         return idx, OpenAI(api_key=key)
 
-    def chat_completion(self, messages: List[Dict[str, Any]], **kwargs) -> Dict[str, Any]:
+    def chat_completion(
+        self, messages: List[Dict[str, Any]], **kwargs
+    ) -> Dict[str, Any]:
         """
         Send a chat completion request with automatic key failover.
 
@@ -149,23 +161,27 @@ class OpenAIClient:
             for attempt in range(1, self.max_retries_per_key + 1):
                 try:
                     resp = client.chat.completions.create(
-                        model=self.model,
-                        messages=messages,
-                        **kwargs
+                        model=self.model, messages=messages, **kwargs
                     )
                     return resp
                 except RateLimitError as e:
-                    print(f"[openai_client] RateLimitError on key idx={idx}: attempt {attempt}: {e}")
+                    print(
+                        f"[openai_client] RateLimitError on key idx={idx}: attempt {attempt}: {e}"
+                    )
                     self._mark_rate_limited(idx)
                     last_exc = e
                     break
                 except (APIError, APIConnectionError, APITimeoutError) as e:
-                    print(f"[openai_client] Service/API/Timeout error on key idx={idx}: {e}")
+                    print(
+                        f"[openai_client] Service/API/Timeout error on key idx={idx}: {e}"
+                    )
                     self._mark_rate_limited(idx, cooldown=10)
                     last_exc = e
                     break
                 except AuthenticationError as e:
-                    print(f"[openai_client] AuthenticationError (invalid key) idx={idx}: {e}")
+                    print(
+                        f"[openai_client] AuthenticationError (invalid key) idx={idx}: {e}"
+                    )
                     self._mark_bad(idx)
                     last_exc = e
                     break
@@ -173,7 +189,9 @@ class OpenAIClient:
                     print(f"[openai_client] BadRequestError: {e}")
                     raise
                 except Exception as e:
-                    print(f"[openai_client] Unexpected error on key idx={idx}: {type(e).__name__}: {e}")
+                    print(
+                        f"[openai_client] Unexpected error on key idx={idx}: {type(e).__name__}: {e}"
+                    )
                     self._mark_rate_limited(idx, cooldown=5)
                     last_exc = e
                     break
@@ -187,10 +205,14 @@ class OpenAIClient:
                 )
                 if soonest and soonest > time.time():
                     wait = max(1.0, soonest - time.time())
-                    print(f"[openai_client] All keys on cooldown, waiting {math.ceil(wait)}s for earliest cooldown...")
+                    print(
+                        f"[openai_client] All keys on cooldown, waiting {math.ceil(wait)}s for earliest cooldown..."
+                    )
                     time.sleep(wait + 0.5)
                     continue
-                raise RuntimeError("Exhausted all API keys; last error: {}".format(last_exc))
+                raise RuntimeError(
+                    "Exhausted all API keys; last error: {}".format(last_exc)
+                )
 
             time.sleep(0.5)
 
@@ -202,3 +224,24 @@ class OpenAIClient:
             return resp.choices[0].message.content
         except Exception:
             return str(resp)
+
+
+# ===== ADD THIS FUNCTION AT THE END (OUTSIDE THE CLASS) =====
+def get_llm_response(user_input: str, context: list = None) -> str:
+    """Compatibility function for existing code that expects get_llm_response."""
+    client = OpenAIClient()
+    
+    # Build messages from context
+    messages = []
+    if context:
+        for exchange in context[-3:]:
+            messages.append({"role": "user", "content": exchange.get('user', '')})
+            messages.append({"role": "assistant", "content": exchange.get('ai', '')})
+    
+    messages.append({"role": "user", "content": user_input})
+    
+    try:
+        response = client.chat_completion(messages=messages)
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"Error: {str(e)}"

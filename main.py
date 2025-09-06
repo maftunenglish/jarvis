@@ -8,8 +8,8 @@ from memory.short_term import add_to_history, get_recent_history  # RESTORED
 from memory.long_term import long_term_memory  # RESTORED
 from brain.api_manager import api_manager
 
-# Use the client manager singleton (avoids circular imports and duplicate clients)
-from brain.llm_clients.client_manager import get_openai_client
+
+from brain.llm_clients.openai_client import get_llm_response  # CORRECT
 
 # Auto-import API keys from .env on startup into DB (api_manager will attempt this)
 try:
@@ -22,21 +22,6 @@ except Exception as e:
     print(f"Error importing API keys: {e}")
 
 # Create/get the shared OpenAI client instance
-openai_client = get_openai_client()
-
-# Sync DB (unmasked) keys into the client if available
-try:
-    if hasattr(api_manager, "get_unmasked_keys"):
-        db_keys = api_manager.get_unmasked_keys("openai")
-        if db_keys:
-            openai_client.set_keys(db_keys)
-            print(f"[main] Synced {len(db_keys)} OpenAI key(s) from DB into client.")
-        else:
-            print("[main] No unmasked OpenAI keys found in DB to sync into client.")
-    else:
-        print("[main] api_manager.get_unmasked_keys not available; client will rely on environment or runtime adds.")
-except Exception as e:
-    print(f"[main] Error syncing API keys into client: {e}")
 
 
 def main():

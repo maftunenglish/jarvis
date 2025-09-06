@@ -7,7 +7,7 @@ from memory.long_term import long_term_memory
 
 # API / client manager
 from brain.api_manager import api_manager
-from brain.llm_clients.client_manager import get_openai_client
+from brain.llm_clients.openai_client import get_llm_response
 
 # Google Keep is optional since we're skipping it for now
 google_keep_available = False

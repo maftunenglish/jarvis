@@ -33,7 +33,7 @@ except Exception as e:
 class OpenAIClient:
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
+        model: str = "gpt-4o-mini",
         default_cooldown: int = 60,  # seconds to cooldown a rate-limited key
         max_retries_per_key: int = 1,  # retry attempts per key before rotating
     ):

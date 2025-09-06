@@ -1,11 +1,6 @@
 # brain/llm_clients/openai_client.py
 """
 Robust OpenAI client with API-key rotation and retry on rate-limits/errors.
-
-Usage:
-    from brain.llm_clients.openai_client import OpenAIClient
-    client = OpenAIClient()
-    resp = client.chat_completion(messages=[{"role":"user","content":"hello"}])
 """
 
 import os
@@ -34,19 +29,21 @@ class OpenAIClient:
     def __init__(
         self,
         model: str = "gpt-4o-mini",
-        default_cooldown: int = 60,  # seconds to cooldown a rate-limited key
-        max_retries_per_key: int = 1,  # retry attempts per key before rotating
+        default_cooldown: int = 60,
+        max_retries_per_key: int = 1,
+        min_request_interval: float = 3.0,
     ):
-        load_dotenv()  # loads .env in repo root if present
+        load_dotenv()
         self.model = model
         self.default_cooldown = default_cooldown
         self.max_retries_per_key = max_retries_per_key
-
+        self.min_request_interval = min_request_interval
+        self.last_request_time = 0
+        
         self._raw_keys = self._load_keys_from_env()
         if not self._raw_keys:
             raise RuntimeError("No OpenAI API keys found in environment.")
 
-        # state for each key: {'key': ..., 'cooldown_until': 0.0, 'bad': False}
         self.keys_state = [
             {"key": k.strip(), "cooldown_until": 0.0, "bad": False}
             for k in self._raw_keys
@@ -54,12 +51,7 @@ class OpenAIClient:
         self.current_index = 0
 
     def _load_keys_from_env(self) -> List[str]:
-        """
-        Support multiple ways to define keys in .env:
-        - OPENAI_API_KEYS="key1,key2, key3"
-        - OPENAI_API_KEY (single)
-        - OPENAI_API_KEY_1, OPENAI_API_KEY_2, ...
-        """
+        """Load API keys from environment variables."""
         keys = []
 
         # 1) comma separated list
@@ -90,7 +82,7 @@ class OpenAIClient:
         return keys
 
     def _get_available_key_index(self) -> Optional[int]:
-        """Return index of next available key not on cooldown and not marked bad, or None."""
+        """Return index of next available key not on cooldown and not marked bad."""
         n = len(self.keys_state)
         for offset in range(n):
             idx = (self.current_index + offset) % n
@@ -117,7 +109,7 @@ class OpenAIClient:
         self.current_index = idx
 
     def _rotate_next(self):
-        """Advance current_index to next available key (if any)."""
+        """Advance current_index to next available key."""
         n = len(self.keys_state)
         for i in range(1, n + 1):
             cand = (self.current_index + i) % n
@@ -132,56 +124,51 @@ class OpenAIClient:
     def _select_and_apply_key(self) -> (int, OpenAI):
         idx = self._get_available_key_index()
         if idx is None:
-            raise RuntimeError(
-                "All API keys are either on cooldown or invalid/blocked."
-            )
+            raise RuntimeError("All API keys are either on cooldown or invalid/blocked.")
         self._rotate_to_index(idx)
         key = self.keys_state[idx]["key"]
         print(f"[openai_client] Using key index {idx}.")
         return idx, OpenAI(api_key=key)
 
-    def chat_completion(
-        self, messages: List[Dict[str, Any]], **kwargs
-    ) -> Dict[str, Any]:
-        """
-        Send a chat completion request with automatic key failover.
+    def chat_completion(self, messages: List[Dict[str, Any]], **kwargs) -> Dict[str, Any]:
+        """Send chat completion request with automatic key failover and throttling."""
+        # Request throttling
+        current_time = time.time()
+        time_since_last = current_time - self.last_request_time
 
-        kwargs forwarded to openai.chat.completions.create (e.g., temperature, max_tokens).
-        """
+        if time_since_last < self.min_request_interval:
+            sleep_time = self.min_request_interval - time_since_last
+            print(f"[openai_client] Throttling: waiting {sleep_time:.1f}s between requests")
+            time.sleep(sleep_time)
+
+        self.last_request_time = time.time()
+
         last_exc = None
 
-        # outer loop: while there are candidate keys available
         while True:
             try:
                 idx, client = self._select_and_apply_key()
             except RuntimeError as e:
                 raise RuntimeError("No valid OpenAI API keys available: " + str(e))
 
-            # attempt up to max_retries_per_key times on the chosen key
             for attempt in range(1, self.max_retries_per_key + 1):
                 try:
                     resp = client.chat.completions.create(
-                        model=self.model, messages=messages, **kwargs
+                        model=self.model, messages=messages, timeout=30.0, **kwargs
                     )
                     return resp
                 except RateLimitError as e:
-                    print(
-                        f"[openai_client] RateLimitError on key idx={idx}: attempt {attempt}: {e}"
-                    )
+                    print(f"[openai_client] RateLimitError on key idx={idx}: attempt {attempt}: {e}")
                     self._mark_rate_limited(idx)
                     last_exc = e
                     break
                 except (APIError, APIConnectionError, APITimeoutError) as e:
-                    print(
-                        f"[openai_client] Service/API/Timeout error on key idx={idx}: {e}"
-                    )
+                    print(f"[openai_client] Service/API/Timeout error on key idx={idx}: {e}")
                     self._mark_rate_limited(idx, cooldown=10)
                     last_exc = e
                     break
                 except AuthenticationError as e:
-                    print(
-                        f"[openai_client] AuthenticationError (invalid key) idx={idx}: {e}"
-                    )
+                    print(f"[openai_client] AuthenticationError (invalid key) idx={idx}: {e}")
                     self._mark_bad(idx)
                     last_exc = e
                     break
@@ -189,14 +176,11 @@ class OpenAIClient:
                     print(f"[openai_client] BadRequestError: {e}")
                     raise
                 except Exception as e:
-                    print(
-                        f"[openai_client] Unexpected error on key idx={idx}: {type(e).__name__}: {e}"
-                    )
+                    print(f"[openai_client] Unexpected error on key idx={idx}: {type(e).__name__}: {e}")
                     self._mark_rate_limited(idx, cooldown=5)
                     last_exc = e
                     break
 
-            # try rotate to next available key
             rotated = self._rotate_next()
             if not rotated:
                 soonest = min(
@@ -205,18 +189,13 @@ class OpenAIClient:
                 )
                 if soonest and soonest > time.time():
                     wait = max(1.0, soonest - time.time())
-                    print(
-                        f"[openai_client] All keys on cooldown, waiting {math.ceil(wait)}s for earliest cooldown..."
-                    )
+                    print(f"[openai_client] All keys on cooldown, waiting {math.ceil(wait)}s for earliest cooldown...")
                     time.sleep(wait + 0.5)
                     continue
-                raise RuntimeError(
-                    "Exhausted all API keys; last error: {}".format(last_exc)
-                )
+                raise RuntimeError("Exhausted all API keys; last error: {}".format(last_exc))
 
             time.sleep(0.5)
 
-    # convenience wrapper for simple usage
     def say(self, text: str, **kwargs) -> str:
         messages = [{"role": "user", "content": text}]
         resp = self.chat_completion(messages=messages, **kwargs)
@@ -226,17 +205,15 @@ class OpenAIClient:
             return str(resp)
 
 
-# ===== ADD THIS FUNCTION AT THE END (OUTSIDE THE CLASS) =====
 def get_llm_response(user_input: str, context: list = None) -> str:
-    """Compatibility function for existing code that expects get_llm_response."""
+    """Compatibility function for existing code."""
     client = OpenAIClient()
     
-    # Build messages from context
     messages = []
     if context:
         for exchange in context[-3:]:
-            messages.append({"role": "user", "content": exchange.get('user', '')})
-            messages.append({"role": "assistant", "content": exchange.get('ai', '')})
+            messages.append({"role": "user", "content": exchange.get("user", "")})
+            messages.append({"role": "assistant", "content": exchange.get("ai", "")})
     
     messages.append({"role": "user", "content": user_input})
     

@@ -9,7 +9,7 @@ Orchestrator: routes tasks between tools, memory, and LLMs.
 from brain.llm_clients.gemini_client import get_gemini_response
 
 # OPTION 2: Use OpenAI 
-# from brain.llm_clients.openai_client import get_llm_response
+from brain.llm_clients.openai_client import get_llm_response
 
 # OPTION 3: Use DeepSeek
 # from brain.llm_clients.deepseek_client import get_deepseek_response
@@ -27,7 +27,7 @@ def route_task(user_input: str, context=None) -> str:
         response = get_gemini_response(user_input, context)
         
         # OPTION 2: Use OpenAI (uncomment if using OpenAI)
-        # response = get_llm_response(user_input, context)
+        response = get_llm_response(user_input, context)
         
         # OPTION 3: Use DeepSeek (uncomment if using DeepSeek)
         # response = get_deepseek_response(user_input, context)

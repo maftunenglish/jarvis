@@ -1,76 +1,204 @@
 # brain/llm_clients/openai_client.py
-from openai import OpenAI
-from config.settings import settings
-import yaml
+"""
+Robust OpenAI client with API-key rotation and retry on rate-limits/errors.
+
+Usage:
+    from brain.llm_clients.openai_client import OpenAIClient
+    client = OpenAIClient()
+    resp = client.chat_completion(messages=[{"role":"user","content":"hello"}])
+"""
+
 import os
-from brain.api_manager import api_manager
-from memory.short_term import get_recent_history
+import time
+import math
+from typing import List, Dict, Any, Optional
+from dotenv import load_dotenv
 
-def load_jarvis_persona():
-    """Loads the Jarvis personality prompt from the YAML file."""
-    try:
-        persona_path = os.path.join('config', 'personas', 'jarvis.yaml')
-        with open(persona_path, 'r') as file:
-            data = yaml.safe_load(file)
-            return data.get('system_prompt', 'You are a helpful assistant.')
-    except FileNotFoundError:
-        print("Jarvis persona file not found. Using default prompt.")
-        return "You are a helpful assistant."
+try:
+    from openai import (
+        APIError,
+        APIConnectionError,
+        RateLimitError,
+        APITimeoutError,
+        AuthenticationError,
+        BadRequestError,
+    )
+    from openai import OpenAI
+except Exception as e:
+    raise RuntimeError(
+        "Please install/upgrade the 'openai' package (pip install --upgrade openai)."
+    ) from e
 
-JARVIS_PROMPT = load_jarvis_persona()
 
-def get_llm_response(user_input: str, context: list = None) -> str:
-    """
-    Sends a user's message to the GPT model with conversation context.
-    Uses API manager for key rotation and failover.
-    """
-    max_retries = 3
-    retry_count = 0
-    
-    while retry_count < max_retries:
+class OpenAIClient:
+    def __init__(
+        self,
+        model: str = "gpt-3.5-turbo",
+        default_cooldown: int = 60,        # seconds to cooldown a rate-limited key
+        max_retries_per_key: int = 1,      # retry attempts per key before rotating
+    ):
+        load_dotenv()  # loads .env in repo root if present
+        self.model = model
+        self.default_cooldown = default_cooldown
+        self.max_retries_per_key = max_retries_per_key
+
+        self._raw_keys = self._load_keys_from_env()
+        if not self._raw_keys:
+            raise RuntimeError("No OpenAI API keys found in environment.")
+
+        # state for each key: {'key': ..., 'cooldown_until': 0.0, 'bad': False}
+        self.keys_state = [
+            {"key": k.strip(), "cooldown_until": 0.0, "bad": False} for k in self._raw_keys
+        ]
+        self.current_index = 0
+
+    def _load_keys_from_env(self) -> List[str]:
+        """
+        Support multiple ways to define keys in .env:
+        - OPENAI_API_KEYS="key1,key2, key3"
+        - OPENAI_API_KEY (single)
+        - OPENAI_API_KEY_1, OPENAI_API_KEY_2, ...
+        """
+        keys = []
+
+        # 1) comma separated list
+        multi = os.getenv("OPENAI_API_KEYS")
+        if multi:
+            for k in multi.split(","):
+                ks = k.strip()
+                if ks:
+                    keys.append(ks)
+
+        # 2) single key var
+        single = os.getenv("OPENAI_API_KEY") or os.getenv("OPENAI_KEY")
+        if single:
+            if single not in keys:
+                keys.append(single.strip())
+
+        # 3) numbered keys
+        i = 1
+        while True:
+            kname = f"OPENAI_API_KEY_{i}"
+            val = os.getenv(kname)
+            if not val:
+                break
+            if val.strip() and val.strip() not in keys:
+                keys.append(val.strip())
+            i += 1
+
+        return keys
+
+    def _get_available_key_index(self) -> Optional[int]:
+        """Return index of next available key not on cooldown and not marked bad, or None."""
+        n = len(self.keys_state)
+        for offset in range(n):
+            idx = (self.current_index + offset) % n
+            st = self.keys_state[idx]
+            if st["bad"]:
+                continue
+            if time.time() >= st["cooldown_until"]:
+                return idx
+        return None
+
+    def _mark_rate_limited(self, idx: int, cooldown: Optional[int] = None):
+        self.keys_state[idx]["cooldown_until"] = time.time() + (cooldown or self.default_cooldown)
+        print(f"[openai_client] Key at index {idx} put on cooldown until {self.keys_state[idx]['cooldown_until']}")
+
+    def _mark_bad(self, idx: int):
+        self.keys_state[idx]["bad"] = True
+        print(f"[openai_client] Key at index {idx} marked BAD (removed from rotation).")
+
+    def _rotate_to_index(self, idx: int):
+        self.current_index = idx
+
+    def _rotate_next(self):
+        """Advance current_index to next available key (if any)."""
+        n = len(self.keys_state)
+        for i in range(1, n + 1):
+            cand = (self.current_index + i) % n
+            if not self.keys_state[cand]["bad"] and time.time() >= self.keys_state[cand]["cooldown_until"]:
+                self.current_index = cand
+                return True
+        return False
+
+    def _select_and_apply_key(self) -> (int, OpenAI):
+        idx = self._get_available_key_index()
+        if idx is None:
+            raise RuntimeError("All API keys are either on cooldown or invalid/blocked.")
+        self._rotate_to_index(idx)
+        key = self.keys_state[idx]["key"]
+        print(f"[openai_client] Using key index {idx}.")
+        return idx, OpenAI(api_key=key)
+
+    def chat_completion(self, messages: List[Dict[str, Any]], **kwargs) -> Dict[str, Any]:
+        """
+        Send a chat completion request with automatic key failover.
+
+        kwargs forwarded to openai.chat.completions.create (e.g., temperature, max_tokens).
+        """
+        last_exc = None
+
+        # outer loop: while there are candidate keys available
+        while True:
+            try:
+                idx, client = self._select_and_apply_key()
+            except RuntimeError as e:
+                raise RuntimeError("No valid OpenAI API keys available: " + str(e))
+
+            # attempt up to max_retries_per_key times on the chosen key
+            for attempt in range(1, self.max_retries_per_key + 1):
+                try:
+                    resp = client.chat.completions.create(
+                        model=self.model,
+                        messages=messages,
+                        **kwargs
+                    )
+                    return resp
+                except RateLimitError as e:
+                    print(f"[openai_client] RateLimitError on key idx={idx}: attempt {attempt}: {e}")
+                    self._mark_rate_limited(idx)
+                    last_exc = e
+                    break
+                except (APIError, APIConnectionError, APITimeoutError) as e:
+                    print(f"[openai_client] Service/API/Timeout error on key idx={idx}: {e}")
+                    self._mark_rate_limited(idx, cooldown=10)
+                    last_exc = e
+                    break
+                except AuthenticationError as e:
+                    print(f"[openai_client] AuthenticationError (invalid key) idx={idx}: {e}")
+                    self._mark_bad(idx)
+                    last_exc = e
+                    break
+                except BadRequestError as e:
+                    print(f"[openai_client] BadRequestError: {e}")
+                    raise
+                except Exception as e:
+                    print(f"[openai_client] Unexpected error on key idx={idx}: {type(e).__name__}: {e}")
+                    self._mark_rate_limited(idx, cooldown=5)
+                    last_exc = e
+                    break
+
+            # try rotate to next available key
+            rotated = self._rotate_next()
+            if not rotated:
+                soonest = min(
+                    (st["cooldown_until"] for st in self.keys_state if not st["bad"]),
+                    default=None,
+                )
+                if soonest and soonest > time.time():
+                    wait = max(1.0, soonest - time.time())
+                    print(f"[openai_client] All keys on cooldown, waiting {math.ceil(wait)}s for earliest cooldown...")
+                    time.sleep(wait + 0.5)
+                    continue
+                raise RuntimeError("Exhausted all API keys; last error: {}".format(last_exc))
+
+            time.sleep(0.5)
+
+    # convenience wrapper for simple usage
+    def say(self, text: str, **kwargs) -> str:
+        messages = [{"role": "user", "content": text}]
+        resp = self.chat_completion(messages=messages, **kwargs)
         try:
-            # Get next available API key from manager
-            api_key = api_manager.get_next_available_key('openai')
-            
-            if not api_key:
-                return "All API keys are currently rate-limited. Please try again later, Sir."
-            
-            # Create client with the obtained key
-            client = OpenAI(api_key=api_key)
-            
-            # Prepare message history with context
-            messages = [{"role": "system", "content": JARVIS_PROMPT}]
-            
-            # Add conversation context if provided
-            if context:
-                for exchange in context[-3:]:
-                    messages.append({"role": "user", "content": exchange['user']})
-                    messages.append({"role": "assistant", "content": exchange['ai']})
-            
-            # Add the current user input
-            messages.append({"role": "user", "content": user_input})
-            
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages
-            )
-            return response.choices[0].message.content.strip()
-            
-        except Exception as e:
-            error_msg = str(e)
-            
-            # Check if rate limit error
-            if "rate limit" in error_msg.lower() or "429" in error_msg:
-                print(f"Rate limit hit. Marking key as limited.")
-                api_manager.mark_key_rate_limited(api_key)
-                retry_count += 1
-                continue
-            elif "invalid" in error_msg.lower() or "401" in error_msg:
-                print(f"Invalid API key. Marking as invalid.")
-                api_manager.mark_key_rate_limited(api_key)
-                retry_count += 1
-                continue
-            else:
-                return f"I apologize, but I encountered an error: {error_msg}"
-    
-    return "All API retries failed. Please try again later, Sir."
+            return resp.choices[0].message.content
+        except Exception:
+            return str(resp)

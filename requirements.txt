@@ -1,6 +1,6 @@
-openai>=1.0.0
+openai
 requests>=2.28.0
-python-dotenv>=1.0.0
+python-dotenv
 SpeechRecognition==3.10.0
 pyttsx3==2.90
 PyAudio==0.2.11

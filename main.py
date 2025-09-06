@@ -1,28 +1,19 @@
 # main.py
-# from brain.llm_clients.openai_client import get_llm_response
 from brain.orchestrator import route_task
 from body.dispatcher import dispatch_command
 from interfaces.input_manager import get_user_input, select_interface_mode
 from interfaces.voice_output import speak
-from memory.short_term import add_to_history, get_recent_history  # RESTORED
-from memory.long_term import long_term_memory  # RESTORED
+from memory.short_term import add_to_history, get_recent_history
+from memory.long_term import long_term_memory
 from brain.api_manager import api_manager
+from brain.llm_clients.deepseek_client import get_deepseek_response as get_llm_response
 
-
-from brain.llm_clients.openai_client import get_llm_response  # CORRECT
-
-# Auto-import API keys from .env on startup into DB (api_manager will attempt this)
-try:
-    imported_count = api_manager.import_keys_from_env()
-    if imported_count > 0:
-        print(f"Automatically imported {imported_count} API keys from environment")
-    else:
-        print("No API keys found in environment. Use 'add api key' command.")
-except Exception as e:
-    print(f"Error importing API keys: {e}")
-
-# Create/get the shared OpenAI client instance
-
+# Force import API keys from .env on startup
+imported_count = api_manager.import_keys_from_env()
+if imported_count > 0:
+    print(f"✅ Imported {imported_count} API keys from environment")
+else:
+    print("❌ No API keys found in environment. Use 'add api key' command.")
 
 def main():
     mode = select_interface_mode()
@@ -79,7 +70,6 @@ def main():
 
         # Add to conversation history
         add_to_history(user_input, response)
-
 
 if __name__ == "__main__":
     main()

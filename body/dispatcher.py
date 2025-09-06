@@ -64,8 +64,14 @@ def _parse_add_api_key(parts: list) -> tuple:
     return service, api_key, priority
 
 
-def dispatch_command(user_input):
+def dispatch_command(user_input: str):
     user_input_lower = user_input.lower()
+    
+    if user_input_lower.startswith('add api key'):
+        # Trigger API key addition workflow
+        from brain.api_manager import api_manager
+        # ... key addition logic here ...
+        return "Please enter your API key:"
 
     # Existing tools
     if "time" in user_input_lower:

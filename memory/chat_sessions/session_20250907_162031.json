@@ -1,0 +1,148 @@
+{
+  "metadata": {
+    "session_id": "session_20250907_162031",
+    "session_start": "2025-09-07T16:18:22.008796",
+    "session_end": "2025-09-07T16:20:31.645579",
+    "total_messages": 13,
+    "user_messages": 6,
+    "ai_messages": 7,
+    "total_user_chars": 138,
+    "total_ai_chars": 0,
+    "total_user_words": 30,
+    "total_ai_words": 0,
+    "autosave": false,
+    "session_duration_seconds": 127.621767
+  },
+  "messages": [
+    {
+      "timestamp": "2025-09-07T16:18:22.008796",
+      "user": "ai",
+      "message": "\"Good afternoon, Sir. Shall I prepare a stimulant, or perhaps a moment of silence from the outside world?\"",
+      "response": "",
+      "message_length": 106,
+      "response_length": 0,
+      "message_words": 18,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:18:32.351584",
+      "user": "user",
+      "message": "i am maftun hasan siam",
+      "response": "",
+      "message_length": 22,
+      "response_length": 0,
+      "message_words": 5,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:18:36.472224",
+      "user": "ai",
+      "message": "Indeed, Sir Maftun Hasan Siam. How may I be of service to you today? Whether it's managing your digital operations or providing insightful recommendations, I stand ready to assist.",
+      "response": "",
+      "message_length": 180,
+      "response_length": 0,
+      "message_words": 29,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:19:19.558713",
+      "user": "user",
+      "message": "tell me what is my name",
+      "response": "",
+      "message_length": 23,
+      "response_length": 0,
+      "message_words": 6,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:19:19.562127",
+      "user": "ai",
+      "message": "I don't have any information about your name yet, Sir.",
+      "response": "",
+      "message_length": 54,
+      "response_length": 0,
+      "message_words": 10,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:19:27.807446",
+      "user": "user",
+      "message": "i said my name",
+      "response": "",
+      "message_length": 14,
+      "response_length": 0,
+      "message_words": 4,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:19:29.197702",
+      "user": "ai",
+      "message": "Ah, quite right, Sir Maftun Hasan Siam. My apologies for the oversight. How may I assist you today, Sir?",
+      "response": "",
+      "message_length": 104,
+      "response_length": 0,
+      "message_words": 19,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:19:53.966694",
+      "user": "user",
+      "message": "my favourite sports it football",
+      "response": "",
+      "message_length": 31,
+      "response_length": 0,
+      "message_words": 5,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:19:55.482262",
+      "user": "ai",
+      "message": "Very well, Sir Maftun Hasan Siam. Football it is, a splendid choice indeed. Would you like information on recent matches, player statistics, or perhaps tactics to discuss?",
+      "response": "",
+      "message_length": 171,
+      "response_length": 0,
+      "message_words": 27,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:20:18.302633",
+      "user": "user",
+      "message": "tell me my name and my favourite sports name",
+      "response": "",
+      "message_length": 44,
+      "response_length": 0,
+      "message_words": 9,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:20:19.799217",
+      "user": "ai",
+      "message": "Certainly, Sir Maftun Hasan Siam. Your name is Maftun Hasan Siam, and your favourite sport is football. Should you require further information or assistance related to football, please do not hesitate to ask!",
+      "response": "",
+      "message_length": 208,
+      "response_length": 0,
+      "message_words": 33,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:20:29.630462",
+      "user": "user",
+      "message": "quit",
+      "response": "",
+      "message_length": 4,
+      "response_length": 0,
+      "message_words": 1,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:20:29.630563",
+      "user": "ai",
+      "message": "Shutting down systems. Goodbye, Sir.",
+      "response": "",
+      "message_length": 36,
+      "response_length": 0,
+      "message_words": 5,
+      "response_words": 0
+    }
+  ]
+}

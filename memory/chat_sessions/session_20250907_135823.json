@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "session_id": "session_20250907_135823",
+    "session_start": "2025-09-07T13:53:26.943461",
+    "session_end": "2025-09-07T13:58:23.189920",
+    "total_messages": 3,
+    "user_messages": 1,
+    "ai_messages": 2,
+    "total_user_chars": 43,
+    "total_ai_chars": 0,
+    "total_user_words": 8,
+    "total_ai_words": 0,
+    "autosave": true,
+    "session_duration_seconds": 29.358962
+  },
+  "messages": [
+    {
+      "timestamp": "2025-09-07T13:53:26.943461",
+      "user": "ai",
+      "message": "\"Good afternoon, Sir. Shall I prepare a stimulant, or perhaps a moment of silence from the outside world?\"",
+      "response": "",
+      "message_length": 106,
+      "response_length": 0,
+      "message_words": 18,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:53:53.918376",
+      "user": "user",
+      "message": "jarvis do you know any information about me",
+      "response": "",
+      "message_length": 43,
+      "response_length": 0,
+      "message_words": 8,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:53:56.302423",
+      "user": "ai",
+      "message": "Indeed, Sir/Ma'am. I have access to a wealth of data, including your preferences, habits, and various interests. My purpose is to assist you in managing your digital life efficiently. If you require specific information or wish to update any details, please advise, and I shall oblige with the utmost precision.",
+      "response": "",
+      "message_length": 311,
+      "response_length": 0,
+      "message_words": 50,
+      "response_words": 0
+    }
+  ]
+}

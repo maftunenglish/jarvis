@@ -13,6 +13,22 @@ from brain.llm_clients.openai_client import get_llm_response
 google_keep_available = False
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def _parse_add_api_key(parts: list) -> tuple:
     """
     Parse parts after "add api key".

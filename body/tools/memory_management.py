@@ -5,6 +5,7 @@ import re
 import json
 from brain.utils.config_loader import config_loader
 from pathlib import Path
+import sqlite3
 
 class JARVISMemoryManager:
     def __init__(self):
@@ -145,6 +146,62 @@ def remember_fact(user_input: str) -> str:
     """
     return memory_manager.remember_fact(user_input)
 
+def recall_fact(user_input: str) -> str:
+    """
+    Compatibility wrapper for existing code.  
+    Example: recall_fact("what is my name") → delegates to memory_manager
+    """
+    # Delegate to the memory manager's intelligent query system
+    return memory_manager.query_database_intelligently(user_input)
+# Add this temporary debug function to memory_management.py
+# Add this function to your memory_management.py
+
+# Then test with:
+# debug_database()
+def debug_database() -> str:
+    """Debug function to show database contents"""
+    try:
+        conn = sqlite3.connect('memory/jarvis_memory.db')
+        c = conn.cursor()
+        
+        # Get all current facts
+        c.execute("""
+            SELECT subject, attribute, value, valid_from 
+            FROM facts 
+            WHERE valid_until IS NULL
+            ORDER BY subject, attribute
+        """)
+        facts = c.fetchall()
+        
+        # Get some history
+        c.execute("""
+            SELECT subject, attribute, value, valid_from, valid_until
+            FROM facts 
+            WHERE valid_until IS NOT NULL
+            ORDER BY valid_from DESC 
+            LIMIT 5
+        """)
+        history = c.fetchall()
+        
+        conn.close()
+        
+        response = "📊 Database Debug Information:\n\n"
+        response += f"Current Facts: {len(facts)} entries\n"
+        
+        for subject, attribute, value, valid_from in facts:
+            response += f"  {subject}.{attribute} = '{value}' (since {valid_from})\n"
+        
+        response += f"\nRecent History: {len(history)} entries\n"
+        for subject, attribute, value, valid_from, valid_until in history:
+            response += f"  {subject}.{attribute} = '{value}' ({valid_from} to {valid_until})\n"
+        
+        if not facts and not history:
+            response += "  Database is empty or not accessible.\n"
+            
+        return response
+        
+    except Exception as e:
+        return f"❌ Database debug error: {str(e)}"
 def recall_fact(user_input: str) -> str:
     """
     Compatibility wrapper for existing code.  

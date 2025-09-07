@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "session_id": "session_20250907_140231",
+    "session_start": "2025-09-07T14:02:17.262039",
+    "session_end": "2025-09-07T14:02:31.170830",
+    "total_messages": 5,
+    "user_messages": 2,
+    "ai_messages": 3,
+    "total_user_chars": 46,
+    "total_ai_chars": 0,
+    "total_user_words": 9,
+    "total_ai_words": 0,
+    "autosave": true,
+    "session_duration_seconds": 13.908765
+  },
+  "messages": [
+    {
+      "timestamp": "2025-09-07T14:02:17.262039",
+      "user": "ai",
+      "message": "\"Good afternoon, Sir. Shall I prepare a stimulant, or perhaps a moment of silence from the outside world?\"",
+      "response": "",
+      "message_length": 106,
+      "response_length": 0,
+      "message_words": 18,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T14:02:19.326237",
+      "user": "user",
+      "message": "Note that my test value is 12345",
+      "response": "",
+      "message_length": 32,
+      "response_length": 0,
+      "message_words": 7,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T14:02:19.480448",
+      "user": "ai",
+      "message": "Noted and stored in database, Sir. 'my test value is 12345' has been archived.",
+      "response": "",
+      "message_length": 78,
+      "response_length": 0,
+      "message_words": 14,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T14:02:29.430281",
+      "user": "user",
+      "message": "Debug database",
+      "response": "",
+      "message_length": 14,
+      "response_length": 0,
+      "message_words": 2,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T14:02:31.170804",
+      "user": "ai",
+      "message": "Certainly, Sir. Could you please specify the nature of the issues you would like me to investigate within the database? A concise direction would ensure optimal efficiency in rectifying any anomalies.",
+      "response": "",
+      "message_length": 200,
+      "response_length": 0,
+      "message_words": 31,
+      "response_words": 0
+    }
+  ]
+}

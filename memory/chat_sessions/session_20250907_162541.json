@@ -1,0 +1,88 @@
+{
+  "metadata": {
+    "session_id": "session_20250907_162541",
+    "session_start": "2025-09-07T16:20:47.055234",
+    "session_end": "2025-09-07T16:25:41.543521",
+    "total_messages": 7,
+    "user_messages": 3,
+    "ai_messages": 4,
+    "total_user_chars": 66,
+    "total_ai_chars": 0,
+    "total_user_words": 13,
+    "total_ai_words": 0,
+    "autosave": true,
+    "session_duration_seconds": 39.889131
+  },
+  "messages": [
+    {
+      "timestamp": "2025-09-07T16:20:47.055234",
+      "user": "ai",
+      "message": "\"Good afternoon, Sir. Shall I prepare a stimulant, or perhaps a moment of silence from the outside world?\"",
+      "response": "",
+      "message_length": 106,
+      "response_length": 0,
+      "message_words": 18,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:20:51.878809",
+      "user": "user",
+      "message": "hello jarvis",
+      "response": "",
+      "message_length": 12,
+      "response_length": 0,
+      "message_words": 2,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:20:53.415467",
+      "user": "ai",
+      "message": "Good day, Sir. How may I assist you today?",
+      "response": "",
+      "message_length": 42,
+      "response_length": 0,
+      "message_words": 9,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:21:10.870761",
+      "user": "user",
+      "message": "tell my name and my favourite sports",
+      "response": "",
+      "message_length": 36,
+      "response_length": 0,
+      "message_words": 7,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:21:12.397214",
+      "user": "ai",
+      "message": "Regrettably, Sir, I currently lack access to your personal database for those specifics. However, if you could kindly provide me with your name and favourite sports, I shall record that information for future reference.",
+      "response": "",
+      "message_length": 219,
+      "response_length": 0,
+      "message_words": 34,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:21:24.126585",
+      "user": "user",
+      "message": "i told you earlier",
+      "response": "",
+      "message_length": 18,
+      "response_length": 0,
+      "message_words": 4,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T16:21:26.944365",
+      "user": "ai",
+      "message": "Ah, quite right, Sir. My sincere apologies for the oversight. However, my memory does not retain past interactions without explicit updates. Should you wish to share your name and favourite sports once more, I shall ensure they are securely noted for future reference.",
+      "response": "",
+      "message_length": 268,
+      "response_length": 0,
+      "message_words": 43,
+      "response_words": 0
+    }
+  ]
+}

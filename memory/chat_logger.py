@@ -39,7 +39,7 @@ class ChatLogger:
         self.current_session.append(entry)
         
         # Auto-save if session is getting large
-        if len(self.current_session) % 5 == 0:  # Every 5 messages
+        if len(self.current_session) % 20 == 0:  # Every 5 messages
             self.save_session(autosave=True)
     
     def _start_auto_save(self):

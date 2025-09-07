@@ -1,0 +1,118 @@
+{
+  "metadata": {
+    "session_id": "session_20250907_134031",
+    "session_start": "2025-09-07T13:38:29.142662",
+    "session_end": "2025-09-07T13:40:31.590683",
+    "total_messages": 10,
+    "user_messages": 5,
+    "ai_messages": 5,
+    "total_user_chars": 184,
+    "total_ai_chars": 0,
+    "total_user_words": 39,
+    "total_ai_words": 0,
+    "autosave": true,
+    "session_duration_seconds": 122.447974
+  },
+  "messages": [
+    {
+      "timestamp": "2025-09-07T13:38:29.142662",
+      "user": "ai",
+      "message": "\"Good afternoon, Sir. Shall I prepare a stimulant, or perhaps a moment of silence from the outside world?\"",
+      "response": "",
+      "message_length": 106,
+      "response_length": 0,
+      "message_words": 18,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:38:52.590672",
+      "user": "user",
+      "message": "my name is Maftun Hasan Siam",
+      "response": "",
+      "message_length": 28,
+      "response_length": 0,
+      "message_words": 6,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:38:54.209175",
+      "user": "ai",
+      "message": "An honour to make your acquaintance, Sir. How may I assist you today?",
+      "response": "",
+      "message_length": 69,
+      "response_length": 0,
+      "message_words": 13,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:09.055942",
+      "user": "user",
+      "message": "i am 22 years old",
+      "response": "",
+      "message_length": 17,
+      "response_length": 0,
+      "message_words": 5,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:10.766930",
+      "user": "ai",
+      "message": "Indeed, Sir. At such a youthful age, the potential for growth and discovery is quite extraordinary. How may I support you in this exciting chapter of your life?",
+      "response": "",
+      "message_length": 160,
+      "response_length": 0,
+      "message_words": 28,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:24.518166",
+      "user": "user",
+      "message": "i am a man",
+      "response": "",
+      "message_length": 10,
+      "response_length": 0,
+      "message_words": 4,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:26.110165",
+      "user": "ai",
+      "message": "Quite noted, Sir. Your assertion of identity is duly acknowledged. Shall we proceed to discuss how I can assist you with your current endeavors or interests?",
+      "response": "",
+      "message_length": 157,
+      "response_length": 0,
+      "message_words": 26,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:55.462355",
+      "user": "user",
+      "message": "i live in ramgonj, lakshmipur and my birthdate in  6 february 2003",
+      "response": "",
+      "message_length": 66,
+      "response_length": 0,
+      "message_words": 12,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:55.462664",
+      "user": "ai",
+      "message": "Today is Sunday, September 07, 2025.",
+      "response": "",
+      "message_length": 36,
+      "response_length": 0,
+      "message_words": 6,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:40:31.590636",
+      "user": "user",
+      "message": "i live in ramgonj, lakshmipur andi was born on  6 february 2003",
+      "response": "",
+      "message_length": 63,
+      "response_length": 0,
+      "message_words": 12,
+      "response_words": 0
+    }
+  ]
+}

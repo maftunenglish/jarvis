@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "session_id": "session_20250907_133910",
+    "session_start": "2025-09-07T13:38:29.142662",
+    "session_end": "2025-09-07T13:39:10.766981",
+    "total_messages": 5,
+    "user_messages": 2,
+    "ai_messages": 3,
+    "total_user_chars": 45,
+    "total_ai_chars": 0,
+    "total_user_words": 11,
+    "total_ai_words": 0,
+    "autosave": true,
+    "session_duration_seconds": 41.624268
+  },
+  "messages": [
+    {
+      "timestamp": "2025-09-07T13:38:29.142662",
+      "user": "ai",
+      "message": "\"Good afternoon, Sir. Shall I prepare a stimulant, or perhaps a moment of silence from the outside world?\"",
+      "response": "",
+      "message_length": 106,
+      "response_length": 0,
+      "message_words": 18,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:38:52.590672",
+      "user": "user",
+      "message": "my name is Maftun Hasan Siam",
+      "response": "",
+      "message_length": 28,
+      "response_length": 0,
+      "message_words": 6,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:38:54.209175",
+      "user": "ai",
+      "message": "An honour to make your acquaintance, Sir. How may I assist you today?",
+      "response": "",
+      "message_length": 69,
+      "response_length": 0,
+      "message_words": 13,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:09.055942",
+      "user": "user",
+      "message": "i am 22 years old",
+      "response": "",
+      "message_length": 17,
+      "response_length": 0,
+      "message_words": 5,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:10.766930",
+      "user": "ai",
+      "message": "Indeed, Sir. At such a youthful age, the potential for growth and discovery is quite extraordinary. How may I support you in this exciting chapter of your life?",
+      "response": "",
+      "message_length": 160,
+      "response_length": 0,
+      "message_words": 28,
+      "response_words": 0
+    }
+  ]
+}

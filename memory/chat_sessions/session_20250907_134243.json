@@ -1,0 +1,228 @@
+{
+  "metadata": {
+    "session_id": "session_20250907_134243",
+    "session_start": "2025-09-07T13:38:29.142662",
+    "session_end": "2025-09-07T13:42:43.719015",
+    "total_messages": 21,
+    "user_messages": 10,
+    "ai_messages": 11,
+    "total_user_chars": 366,
+    "total_ai_chars": 0,
+    "total_user_words": 72,
+    "total_ai_words": 0,
+    "autosave": false,
+    "session_duration_seconds": 254.576337
+  },
+  "messages": [
+    {
+      "timestamp": "2025-09-07T13:38:29.142662",
+      "user": "ai",
+      "message": "\"Good afternoon, Sir. Shall I prepare a stimulant, or perhaps a moment of silence from the outside world?\"",
+      "response": "",
+      "message_length": 106,
+      "response_length": 0,
+      "message_words": 18,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:38:52.590672",
+      "user": "user",
+      "message": "my name is Maftun Hasan Siam",
+      "response": "",
+      "message_length": 28,
+      "response_length": 0,
+      "message_words": 6,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:38:54.209175",
+      "user": "ai",
+      "message": "An honour to make your acquaintance, Sir. How may I assist you today?",
+      "response": "",
+      "message_length": 69,
+      "response_length": 0,
+      "message_words": 13,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:09.055942",
+      "user": "user",
+      "message": "i am 22 years old",
+      "response": "",
+      "message_length": 17,
+      "response_length": 0,
+      "message_words": 5,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:10.766930",
+      "user": "ai",
+      "message": "Indeed, Sir. At such a youthful age, the potential for growth and discovery is quite extraordinary. How may I support you in this exciting chapter of your life?",
+      "response": "",
+      "message_length": 160,
+      "response_length": 0,
+      "message_words": 28,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:24.518166",
+      "user": "user",
+      "message": "i am a man",
+      "response": "",
+      "message_length": 10,
+      "response_length": 0,
+      "message_words": 4,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:26.110165",
+      "user": "ai",
+      "message": "Quite noted, Sir. Your assertion of identity is duly acknowledged. Shall we proceed to discuss how I can assist you with your current endeavors or interests?",
+      "response": "",
+      "message_length": 157,
+      "response_length": 0,
+      "message_words": 26,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:55.462355",
+      "user": "user",
+      "message": "i live in ramgonj, lakshmipur and my birthdate in  6 february 2003",
+      "response": "",
+      "message_length": 66,
+      "response_length": 0,
+      "message_words": 12,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:39:55.462664",
+      "user": "ai",
+      "message": "Today is Sunday, September 07, 2025.",
+      "response": "",
+      "message_length": 36,
+      "response_length": 0,
+      "message_words": 6,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:40:31.590636",
+      "user": "user",
+      "message": "i live in ramgonj, lakshmipur andi was born on  6 february 2003",
+      "response": "",
+      "message_length": 63,
+      "response_length": 0,
+      "message_words": 12,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:40:33.325642",
+      "user": "ai",
+      "message": "Thank you for that information, Sir. So, you reside in Ramgonj, Lakshmipur, and your birthdate is 6th February 2003. If there's anything specific you would like assistance with, whether it be local information, event planning, or perhaps something entirely different, please do not hesitate to inform me.",
+      "response": "",
+      "message_length": 304,
+      "response_length": 0,
+      "message_words": 47,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:41:37.994669",
+      "user": "user",
+      "message": "\"My father's name is Mizanur Rahman\"",
+      "response": "",
+      "message_length": 36,
+      "response_length": 0,
+      "message_words": 6,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:41:39.674276",
+      "user": "ai",
+      "message": "Noted, Sir. Your father's name is Mizanur Rahman. If there are any particular matters involving your family that you would like assistance with, or if you'd like to discuss something else entirely, pray, let me know. I am at your service.",
+      "response": "",
+      "message_length": 238,
+      "response_length": 0,
+      "message_words": 41,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:41:39.674905",
+      "user": "user",
+      "message": "\"My mother's name is Ayrin akter\"",
+      "response": "",
+      "message_length": 33,
+      "response_length": 0,
+      "message_words": 6,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:41:41.342665",
+      "user": "ai",
+      "message": "Thank you for sharing that information, Sir. Your mother's name is Ayrin Akter. Should you wish to involve them in any queries, or if there is something specific regarding family matters you would like assistance with, please do let me know. I remain at your service.",
+      "response": "",
+      "message_length": 267,
+      "response_length": 0,
+      "message_words": 46,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:41:41.345959",
+      "user": "user",
+      "message": "\"I have a brother named NAFIS IQBAL\"",
+      "response": "",
+      "message_length": 36,
+      "response_length": 0,
+      "message_words": 7,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:41:43.056166",
+      "user": "ai",
+      "message": "Acknowledged, Sir. You have a brother named Nafis Iqbal. Should you require assistance in relation to your brother, family matters, or any other inquiries, please feel free to provide further details. I am here to assist you in any capacity you require.",
+      "response": "",
+      "message_length": 253,
+      "response_length": 0,
+      "message_words": 42,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:42:23.702259",
+      "user": "user",
+      "message": "Note that my passport number is 33988039",
+      "response": "",
+      "message_length": 40,
+      "response_length": 0,
+      "message_words": 7,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:42:23.871180",
+      "user": "ai",
+      "message": "Noted and stored in database, Sir. 'my passport number is 33988039' has been archived.",
+      "response": "",
+      "message_length": 86,
+      "response_length": 0,
+      "message_words": 14,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:42:43.550272",
+      "user": "user",
+      "message": "Store that my security code is 339880",
+      "response": "",
+      "message_length": 37,
+      "response_length": 0,
+      "message_words": 7,
+      "response_words": 0
+    },
+    {
+      "timestamp": "2025-09-07T13:42:43.718999",
+      "user": "ai",
+      "message": "Noted and stored in database, Sir. 'my security code is 339880' has been archived.",
+      "response": "",
+      "message_length": 82,
+      "response_length": 0,
+      "message_words": 14,
+      "response_words": 0
+    }
+  ]
+}
